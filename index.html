@@ -279,23 +279,16 @@ fetch('refrensi.json')
 
 function updateReasonTypeFilter() {
     selectedAccountType = document.getElementById("accountTypeFilter").value;
-    let rows = document.querySelectorAll("#inputTableBody tr");
-
-    rows.forEach((row, index) => {
-        let select = row.querySelector(".reasonTypeSelect");
-        if (!row.dataset.locked) { // Hanya update dropdown jika row belum dikunci
-            populateReasonType(select, selectedAccountType);
-        }
-    });
 }
 
 function populateReasonType(selectElement, accountType) {
-    let previousValue = selectElement.value;
+    let previousValue = selectElement.dataset.lockedValue || selectElement.value;
     selectElement.innerHTML = '<option value="">Pilih Reason Type</option>';
+    
     let filteredReasons = referenceData
         .filter(item => item["Account Type"] === accountType)
         .map(item => item["Reason Type"]);
-
+    
     [...new Set(filteredReasons)].forEach(reason => {
         let opt = document.createElement("option");
         opt.value = reason;
@@ -306,6 +299,8 @@ function populateReasonType(selectElement, accountType) {
     if ([...selectElement.options].some(opt => opt.value === previousValue)) {
         selectElement.value = previousValue;
     }
+
+    selectElement.dataset.lockedValue = selectElement.value;
 }
 
 function addRow() {
@@ -327,13 +322,7 @@ function addRow() {
     let reasonTypeSelect = newRow.querySelector(".reasonTypeSelect");
     populateReasonType(reasonTypeSelect, selectedAccountType);
     
-    // Baris ini tidak dikunci, jadi masih bisa berubah jika filter diubah
     tableBody.appendChild(newRow);
-    
-    // Tandai semua baris sebelumnya agar tidak berubah
-    document.querySelectorAll("#inputTableBody tr").forEach(row => {
-        row.dataset.locked = "true"; // Tandai agar tidak berubah lagi
-    });
 }
 
 function removeRow(button) {
