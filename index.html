@@ -259,7 +259,7 @@ label {
             
         </div>
         <script>
-let referenceData = []; // Store reference JSON data
+let referenceData = [];
 
 fetch('refrensi.json')
     .then(response => response.json())
@@ -277,50 +277,33 @@ fetch('refrensi.json')
     })
     .catch(error => console.error('Error loading preferences:', error));
 
- 
-    function updateReasonTypeFilter() {
+function updateReasonTypeFilter() {
     let selectedAccountType = document.getElementById("accountTypeFilter").value;
     let rows = document.querySelectorAll("#inputTableBody tr");
 
     rows.forEach(row => {
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
-        let previousSelectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
 
-        // Ambil semua Reason Type yang cocok dengan Account Type terpilih
+        // Jika Reason Type sudah dipilih, Account Type tidak bisa diubah
+        if (reasonTypeSelect.value) {
+            document.getElementById("accountTypeFilter").disabled = true;
+        }
+
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
         let uniqueReasons = [...new Set(filteredReasons)];
 
-        // Hapus opsi yang tidak ada dalam uniqueReasons
-        let existingOptions = Array.from(reasonTypeSelect.options).map(opt => opt.value);
-        existingOptions.forEach(optValue => {
-            if (!uniqueReasons.includes(optValue)) {
-                let optToRemove = reasonTypeSelect.querySelector(`option[value="${optValue}"]`);
-                if (optToRemove) optToRemove.remove();
-            }
-        });
-
-        // Tambahkan opsi baru jika belum ada
+        reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
         uniqueReasons.forEach(reason => {
-            if (!existingOptions.includes(reason)) {
-                let opt = document.createElement("option");
-                opt.value = reason;
-                opt.textContent = reason;
-                reasonTypeSelect.appendChild(opt);
-            }
+            let opt = document.createElement("option");
+            opt.value = reason;
+            opt.textContent = reason;
+            reasonTypeSelect.appendChild(opt);
         });
-
-        // Kembalikan pilihan sebelumnya jika masih valid
-        if (uniqueReasons.includes(previousSelectedValue)) {
-            reasonTypeSelect.value = previousSelectedValue;
-        } else {
-            reasonTypeSelect.value = ""; // Kosongkan jika opsi tidak valid
-        }
     });
 }
-
 
 function addRow() {
     let tableBody = document.getElementById("inputTableBody");
@@ -328,7 +311,7 @@ function addRow() {
 
     newRow.innerHTML = `
         <td>
-            <select class="reasonTypeSelect"></select>
+            <select class="reasonTypeSelect" onchange="lockAccountType()"></select>
         </td>
         <td><input type="text" value="ShortCode" readonly></td>
         <td><input type="text" value="SC AWAL"></td>
@@ -341,14 +324,25 @@ function addRow() {
     `;
 
     tableBody.appendChild(newRow);
-    updateReasonTypeFilter(); // Update dropdown pada baris yang baru ditambahkan
+    updateReasonTypeFilter();
 }
 
-
-// Function untuk menghapus baris
 function removeRow(button) {
     let row = button.parentNode.parentNode;
     row.remove();
+
+    // Jika semua Reason Type dihapus, Account Type bisa dipilih kembali
+    let allSelectedReasons = document.querySelectorAll(".reasonTypeSelect");
+    let hasSelectedReason = Array.from(allSelectedReasons).some(select => select.value);
+    
+    document.getElementById("accountTypeFilter").disabled = hasSelectedReason;
+}
+
+function lockAccountType() {
+    let allSelectedReasons = document.querySelectorAll(".reasonTypeSelect");
+    let hasSelectedReason = Array.from(allSelectedReasons).some(select => select.value);
+
+    document.getElementById("accountTypeFilter").disabled = hasSelectedReason;
 }
 
 function saveTempData(index, value) {
@@ -361,19 +355,17 @@ function updateReasonTypeFilter() {
 
     rows.forEach(row => {
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
-        let previousSelectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
+        let previousSelectedValue = reasonTypeSelect.value; 
 
-        // Ambil semua Reason Type yang sesuai dengan Account Type terpilih
+
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
         let uniqueReasons = [...new Set(filteredReasons)];
 
-        // Cek apakah opsi yang ada sekarang sudah sama dengan opsi yang ingin dimasukkan
         let currentOptions = Array.from(reasonTypeSelect.options).map(opt => opt.value);
         if (JSON.stringify(currentOptions) !== JSON.stringify(["", ...uniqueReasons])) {
-            // Hanya update dropdown jika ada perubahan pada opsi
             reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
 
             uniqueReasons.forEach(reason => {
@@ -383,7 +375,6 @@ function updateReasonTypeFilter() {
                 reasonTypeSelect.appendChild(opt);
             });
 
-            // Kembalikan pilihan sebelumnya jika masih valid
             if (uniqueReasons.includes(previousSelectedValue)) {
                 reasonTypeSelect.value = previousSelectedValue;
             }
@@ -393,7 +384,6 @@ function updateReasonTypeFilter() {
 
 
         
-            // Function to process the data and populate the output table
             function processData() {
                 let inputTable = document.getElementById("inputTableBody");
                 let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
@@ -425,7 +415,7 @@ function updateReasonTypeFilter() {
                 generateCSVPreview();
             }
         
-            // Function to download the CSV file
+
             function downloadCSV() {
                 let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
                 let rows = outputTable.getElementsByTagName("tr");
@@ -443,7 +433,7 @@ function updateReasonTypeFilter() {
                 link.click();
             }
         
-            // Function to generate CSV preview
+        
             function generateCSVPreview() {
                 let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
                 let rows = outputTable.getElementsByTagName("tr");
@@ -458,12 +448,11 @@ function updateReasonTypeFilter() {
             }
         
     
-        // Function to toggle dark mode
+
         function toggleDarkMode() {
             document.body.classList.toggle("dark-mode");
         }
     
-        // Function to generate CSV file
         function downloadCSV() {
             let outputTable = document.getElementById("outputTable");
             let rows = Array.from(outputTable.rows);
@@ -473,8 +462,6 @@ function updateReasonTypeFilter() {
             });
             let csvString = csvData.join("\n");
             document.getElementById("csvPreview").textContent = csvString;
-    
-            // Create a downloadable CSV file
             let blob = new Blob([csvString], { type: 'text/csv' });
             let link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
