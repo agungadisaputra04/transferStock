@@ -261,44 +261,15 @@ label {
             
            
         </div>
-    <script>
-        fetch('refrensi.json')
-            .then(response => response.json())
-            .then(data => {
-                let select = document.getElementById("reasonTypeSelect");
-                data.forEach(item => {
-                    let opt = document.createElement("option");
-                    opt.value = item["Reason Type"];
-                    opt.textContent = item["Reason Type"];
-                    select.appendChild(opt);
-                });
-            })
-            .catch(error => console.error('Error loading preferences:', error));
-
-        // Function to add a new row to the input table
-        function addRow() {
-            let tableBody = document.getElementById("inputTableBody");
-            let newRow = document.createElement("tr");
-
-            newRow.innerHTML = `
-                <td><select id="reasonTypeSelect"></select></td>
-                <td><input type="text" value="ShortCode" readonly></td>
-                <td><input type="text" value="SC AWAL"></td>
-                <td><input type="text" value="ShortCode" readonly></td>
-                <td><input type="text" value="SC TUJUAN"></td>
-                <td><input type="text" value="JUMLAH"></td>
-                <td><input type="text" value="IDR" readonly></td>
-                <td><input type="text" value="NO NODINMU"></td>
-                <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
-            `;
-
-            tableBody.appendChild(newRow);
-
-            // Fetch options for the dropdown in the new row
+        <script>
+            let referenceData = []; // Menyimpan data dari refrensi.json
+        
+            // Fetch data dari JSON dan isi dropdown Account Type di awal
             fetch('refrensi.json')
                 .then(response => response.json())
                 .then(data => {
-                    let select = newRow.querySelector("select");
+                    referenceData = data; // Menyimpan data ke referenceData
+                    let select = document.getElementById("reasonTypeSelect");
                     data.forEach(item => {
                         let opt = document.createElement("option");
                         opt.value = item["Reason Type"];
@@ -307,110 +278,153 @@ label {
                     });
                 })
                 .catch(error => console.error('Error loading preferences:', error));
-        }
-
-        // Function to remove a row from the table
-        function removeRow(button) {
-            let row = button.parentNode.parentNode;
-            row.remove();
-        }
-
-        // Function to process the data and populate the output table
-        function processData() {
-            let inputTable = document.getElementById("inputTableBody");
-            let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
-            outputTable.innerHTML = ""; 
-
-            let rows = inputTable.getElementsByTagName("tr");
-
-            Array.from(rows).forEach(row => {
-                let reasonTypeAlias = row.cells[0].querySelector("select").value;
-                let debitIdentifierType = "ShortCode";
-                let debitIdentifierValue = row.cells[2].querySelector("input").value;
-                let creditIdentifierType = "ShortCode";
-                let creditIdentifierValue = row.cells[4].querySelector("input").value;
-                let amount = row.cells[5].querySelector("input").value;
-                let currency = row.cells[6].querySelector("input").value;
-                let comment = row.cells[7].querySelector("input").value;
-
-                let newRow = outputTable.insertRow();
-                newRow.insertCell(0).textContent = reasonTypeAlias;
-                newRow.insertCell(1).textContent = debitIdentifierType;
-                newRow.insertCell(2).textContent = debitIdentifierValue;
-                newRow.insertCell(3).textContent = creditIdentifierType;
-                newRow.insertCell(4).textContent = creditIdentifierValue;
-                newRow.insertCell(5).textContent = amount;
-                newRow.insertCell(6).textContent = currency;
-                newRow.insertCell(7).textContent = "Nodin " + comment;
-            });
-
-            generateCSVPreview();
-        }
-
-        // Function to download the CSV file
-        function downloadCSV() {
-            let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
-            let rows = outputTable.getElementsByTagName("tr");
-            let csvContent = "ReasonType Alias,Debit IdentifierType,Debit IdentifierValue,Credit IdentifierType,Credit IdentifierValue,Amount,Currency,Comment\n";
-
-            Array.from(rows).forEach(row => {
-                let rowData = Array.from(row.getElementsByTagName("td")).map(cell => cell.textContent);
-                csvContent += rowData.join(",") + "\n";
-            });
-
-            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            let link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'output_data.csv';
-            link.click();
-        }
-
-        // Function to generate CSV preview
-        function generateCSVPreview() {
-            let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
-            let rows = outputTable.getElementsByTagName("tr");
-            let csvContent = "ReasonType Alias,Debit IdentifierType,Debit IdentifierValue,Credit IdentifierType,Credit IdentifierValue,Amount,Currency,Comment\n";
-
-            Array.from(rows).forEach(row => {
-                let rowData = Array.from(row.getElementsByTagName("td")).map(cell => cell.textContent);
-                csvContent += rowData.join(",") + "\n";
-            });
-
-            document.getElementById("csvPreview").textContent = csvContent;
-        }
-
-        // Toggle dark mode and light mode
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-        }
-
-        // Load dark mode setting from localStorage
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
-
-        function updateReasonTypeOptions(selectElement) {
-    let selectedAccountType = selectElement.value;
-    let row = selectElement.closest("tr");
-    let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
-
-    // Kosongkan dropdown Reason Type sebelum diisi ulang
-    reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
-
-    // Filter Reason Type berdasarkan Account Type yang dipilih
-    let filteredReasons = referenceData
-        .filter(item => item["Account Type"] === selectedAccountType)
-        .map(item => item["Reason Type"]);
-
-    // Tambahkan pilihan ke dropdown Reason Type
-    [...new Set(filteredReasons)].forEach(reason => {
-        let opt = document.createElement("option");
-        opt.value = reason;
-        opt.textContent = reason;
-        reasonTypeSelect.appendChild(opt);
-    });
-}
-    </script>
+        
+            // Function to add a new row to the input table
+            function addRow() {
+                let tableBody = document.getElementById("inputTableBody");
+                let newRow = document.createElement("tr");
+        
+                newRow.innerHTML = `
+                    <td>
+                        <select id="accountTypeFilter" onchange="updateReasonTypeFilter(this)">
+                            <!-- Opsi Account Type akan ditambahkan di sini -->
+                        </select>
+                    </td>
+                    <td><select class="reasonTypeSelect"></select></td>
+                    <td><input type="text" value="ShortCode" readonly></td>
+                    <td><input type="text" value="SC AWAL"></td>
+                    <td><input type="text" value="ShortCode" readonly></td>
+                    <td><input type="text" value="SC TUJUAN"></td>
+                    <td><input type="text" value="JUMLAH"></td>
+                    <td><input type="text" value="IDR" readonly></td>
+                    <td><input type="text" value="NO NODINMU"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
+                `;
+        
+                tableBody.appendChild(newRow);
+        
+                // Menambahkan dropdown Account Type pada baris baru
+                let selectAccountType = newRow.querySelector("#accountTypeFilter");
+        
+                // Ambil semua Account Type dari data refrensi.json
+                let accountTypes = [...new Set(referenceData.map(item => item["Account Type"]))];
+        
+                // Tambahkan opsi Account Type
+                accountTypes.forEach(type => {
+                    let opt = document.createElement("option");
+                    opt.value = type;
+                    opt.textContent = type;
+                    selectAccountType.appendChild(opt);
+                });
+        
+                // Fetch options untuk dropdown Reason Type pada baris baru
+                updateReasonTypeFilter(selectAccountType); // Mengupdate dropdown Reason Type berdasarkan Account Type
+            }
+        
+            // Function to remove a row from the table
+            function removeRow(button) {
+                let row = button.parentNode.parentNode;
+                row.remove();
+            }
+        
+            // Fungsi untuk mengupdate dropdown Reason Type berdasarkan Account Type
+            function updateReasonTypeFilter(selectElement) {
+                let selectedAccountType = selectElement.value;
+                let row = selectElement.closest("tr");
+                let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
+        
+                // Kosongkan dropdown Reason Type sebelum diisi ulang
+                reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
+        
+                // Filter Reason Type berdasarkan Account Type yang dipilih
+                let filteredReasons = referenceData
+                    .filter(item => item["Account Type"] === selectedAccountType)
+                    .map(item => item["Reason Type"]);
+        
+                // Tambahkan pilihan ke dropdown Reason Type
+                [...new Set(filteredReasons)].forEach(reason => {
+                    let opt = document.createElement("option");
+                    opt.value = reason;
+                    opt.textContent = reason;
+                    reasonTypeSelect.appendChild(opt);
+                });
+            }
+        
+            // Function to process the data and populate the output table
+            function processData() {
+                let inputTable = document.getElementById("inputTableBody");
+                let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
+                outputTable.innerHTML = ""; 
+        
+                let rows = inputTable.getElementsByTagName("tr");
+        
+                Array.from(rows).forEach(row => {
+                    let reasonTypeAlias = row.cells[0].querySelector("select").value;
+                    let debitIdentifierType = "ShortCode";
+                    let debitIdentifierValue = row.cells[2].querySelector("input").value;
+                    let creditIdentifierType = "ShortCode";
+                    let creditIdentifierValue = row.cells[4].querySelector("input").value;
+                    let amount = row.cells[5].querySelector("input").value;
+                    let currency = row.cells[6].querySelector("input").value;
+                    let comment = row.cells[7].querySelector("input").value;
+        
+                    let newRow = outputTable.insertRow();
+                    newRow.insertCell(0).textContent = reasonTypeAlias;
+                    newRow.insertCell(1).textContent = debitIdentifierType;
+                    newRow.insertCell(2).textContent = debitIdentifierValue;
+                    newRow.insertCell(3).textContent = creditIdentifierType;
+                    newRow.insertCell(4).textContent = creditIdentifierValue;
+                    newRow.insertCell(5).textContent = amount;
+                    newRow.insertCell(6).textContent = currency;
+                    newRow.insertCell(7).textContent = "Nodin " + comment;
+                });
+        
+                generateCSVPreview();
+            }
+        
+            // Function to download the CSV file
+            function downloadCSV() {
+                let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
+                let rows = outputTable.getElementsByTagName("tr");
+                let csvContent = "ReasonType Alias,Debit IdentifierType,Debit IdentifierValue,Credit IdentifierType,Credit IdentifierValue,Amount,Currency,Comment\n";
+        
+                Array.from(rows).forEach(row => {
+                    let rowData = Array.from(row.getElementsByTagName("td")).map(cell => cell.textContent);
+                    csvContent += rowData.join(",") + "\n";
+                });
+        
+                let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                let link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'output_data.csv';
+                link.click();
+            }
+        
+            // Function to generate CSV preview
+            function generateCSVPreview() {
+                let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
+                let rows = outputTable.getElementsByTagName("tr");
+                let csvContent = "ReasonType Alias,Debit IdentifierType,Debit IdentifierValue,Credit IdentifierType,Credit IdentifierValue,Amount,Currency,Comment\n";
+        
+                Array.from(rows).forEach(row => {
+                    let rowData = Array.from(row.getElementsByTagName("td")).map(cell => cell.textContent);
+                    csvContent += rowData.join(",") + "\n";
+                });
+        
+                document.getElementById("csvPreview").textContent = csvContent;
+            }
+        
+            // Toggle dark mode and light mode
+            function toggleDarkMode() {
+                document.body.classList.toggle('dark-mode');
+                localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+            }
+        
+            // Load dark mode setting from localStorage
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        </script>
+        
 </body>
 </html>
