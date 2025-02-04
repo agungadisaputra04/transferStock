@@ -259,16 +259,16 @@ label {
             
         </div>
         <script>
-let referenceData = [];
-let tempData = {}; // Object untuk menyimpan data sementara
+let referenceData = []; // Store reference JSON data
 
+// Fetch data from refrensi.json dan isi dropdown Account Type
 fetch('refrensi.json')
     .then(response => response.json())
     .then(data => {
         referenceData = data;
         let select = document.getElementById("accountTypeFilter");
         let uniqueAccountTypes = [...new Set(data.map(item => item["Account Type"]))];
-        
+
         uniqueAccountTypes.forEach(accountType => {
             let opt = document.createElement("option");
             opt.value = accountType;
@@ -278,22 +278,26 @@ fetch('refrensi.json')
     })
     .catch(error => console.error('Error loading preferences:', error));
 
+// Function untuk update Reason Type tanpa mereset pilihan sebelumnya
 function updateReasonTypeFilter() {
     let selectedAccountType = document.getElementById("accountTypeFilter").value;
     let rows = document.querySelectorAll("#inputTableBody tr");
 
-    rows.forEach((row, index) => {
+    rows.forEach(row => {
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
-        let previousSelectedValue = reasonTypeSelect.value;
-        
+        let selectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
+
+        // Kosongkan dropdown dulu
         reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
 
+        // Ambil Reason Type berdasarkan Account Type yang dipilih
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
         let uniqueReasons = [...new Set(filteredReasons)];
 
+        // Tambahkan opsi baru ke dropdown
         uniqueReasons.forEach(reason => {
             let opt = document.createElement("option");
             opt.value = reason;
@@ -301,22 +305,21 @@ function updateReasonTypeFilter() {
             reasonTypeSelect.appendChild(opt);
         });
 
-        if (tempData[index] && uniqueReasons.includes(tempData[index])) {
-            reasonTypeSelect.value = tempData[index];
-        } else if (uniqueReasons.includes(previousSelectedValue)) {
-            reasonTypeSelect.value = previousSelectedValue;
+        // Kembalikan pilihan sebelumnya jika masih valid
+        if (uniqueReasons.includes(selectedValue)) {
+            reasonTypeSelect.value = selectedValue;
         }
     });
 }
 
+// Function untuk menambah baris baru
 function addRow() {
     let tableBody = document.getElementById("inputTableBody");
     let newRow = document.createElement("tr");
-    let rowIndex = tableBody.rows.length;
 
     newRow.innerHTML = `
         <td>
-            <select class="reasonTypeSelect" onchange="saveTempData(${rowIndex}, this.value)"></select>
+            <select class="reasonTypeSelect"></select>
         </td>
         <td><input type="text" value="ShortCode" readonly></td>
         <td><input type="text" value="SC AWAL"></td>
@@ -325,16 +328,17 @@ function addRow() {
         <td><input type="text" value="JUMLAH"></td>
         <td><input type="text" value="IDR" readonly></td>
         <td><input type="text" value="NO NODINMU"></td>
-        <td><button class="remove-btn" onclick="removeRow(this, ${rowIndex})">Hapus</button></td>
+        <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
     `;
+
     tableBody.appendChild(newRow);
-    updateReasonTypeFilter();
+    updateReasonTypeFilter(); // Pastikan dropdown baru juga diupdate tanpa mereset
 }
 
-function removeRow(button, index) {
+// Function untuk menghapus baris
+function removeRow(button) {
     let row = button.parentNode.parentNode;
     row.remove();
-    delete tempData[index];
 }
 
 function saveTempData(index, value) {
