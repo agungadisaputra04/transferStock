@@ -259,53 +259,90 @@ label {
             
         </div>
         <script>
-            let referenceData = []; // Menyimpan data dari refrensi.json
-        
-            // Fetch data dari JSON dan isi dropdown Account Type di awal
-            fetch('refrensi.json')
-                .then(response => response.json())
-                .then(data => {
-                    referenceData = data; // Menyimpan data ke referenceData
-                    let select = document.getElementById("accountTypeFilter");
-                    data.forEach(item => {
-                        let opt = document.createElement("option");
-                        opt.value = item["Account Type"];
-                        opt.textContent = item["Account Type"];
-                        select.appendChild(opt);
-                    });
-                })
-                .catch(error => console.error('Error loading preferences:', error));
-        
-            // Function to add a new row to the input table
-            function addRow() {
-                let tableBody = document.getElementById("inputTableBody");
-                let newRow = document.createElement("tr");
-        
-                newRow.innerHTML = `
-                    <td>
-                        <select class="reasonTypeSelect"></select>
-                    </td>
-                    <td><input type="text" value="ShortCode" readonly></td>
-                    <td><input type="text" value="SC AWAL"></td>
-                    <td><input type="text" value="ShortCode" readonly></td>
-                    <td><input type="text" value="SC TUJUAN"></td>
-                    <td><input type="text" value="JUMLAH"></td>
-                    <td><input type="text" value="IDR" readonly></td>
-                    <td><input type="text" value="NO NODINMU"></td>
-                    <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
-                `;
-        
-                tableBody.appendChild(newRow);
-        
-                // Fetch options untuk dropdown Reason Type pada baris baru
-                updateReasonTypeFilter(); // Mengupdate dropdown Reason Type berdasarkan Account Type
-            }
-        
-            // Function to remove a row from the table
-            function removeRow(button) {
-                let row = button.parentNode.parentNode;
-                row.remove();
-            }
+ let referenceData = []; // Store reference JSON data
+
+// Fetch data from refrensi.json and populate Account Type dropdown
+fetch('refrensi.json')
+    .then(response => response.json())
+    .then(data => {
+        referenceData = data;
+        let select = document.getElementById("accountTypeFilter");
+        let uniqueAccountTypes = [...new Set(data.map(item => item["Account Type"]))]; // Get unique Account Types
+
+        uniqueAccountTypes.forEach(accountType => {
+            let opt = document.createElement("option");
+            opt.value = accountType;
+            opt.textContent = accountType;
+            select.appendChild(opt);
+        });
+    })
+    .catch(error => console.error('Error loading preferences:', error));
+
+// Function to update Reason Type dropdown based on selected Account Type
+function updateReasonTypeFilter() {
+    let selectedAccountType = document.getElementById("accountTypeFilter").value;
+    let rows = document.querySelectorAll("#inputTableBody tr");
+
+    rows.forEach(row => {
+        let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
+
+        // Store the current selected value before updating
+        let selectedValue = reasonTypeSelect.value;
+
+        // Clear existing options
+        reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
+
+        // Get unique Reason Types based on selected Account Type
+        let filteredReasons = referenceData
+            .filter(item => item["Account Type"] === selectedAccountType)
+            .map(item => item["Reason Type"]);
+        let uniqueReasons = [...new Set(filteredReasons)];
+
+        // Add options to dropdown
+        uniqueReasons.forEach(reason => {
+            let opt = document.createElement("option");
+            opt.value = reason;
+            opt.textContent = reason;
+            reasonTypeSelect.appendChild(opt);
+        });
+
+        // Restore previously selected value if it is still valid
+        if (uniqueReasons.includes(selectedValue)) {
+            reasonTypeSelect.value = selectedValue;
+        }
+    });
+}
+
+// Function to add a new row
+function addRow() {
+    let tableBody = document.getElementById("inputTableBody");
+    let newRow = document.createElement("tr");
+
+    newRow.innerHTML = `
+        <td>
+            <select class="reasonTypeSelect"></select>
+        </td>
+        <td><input type="text" value="ShortCode" readonly></td>
+        <td><input type="text" value="SC AWAL"></td>
+        <td><input type="text" value="ShortCode" readonly></td>
+        <td><input type="text" value="SC TUJUAN"></td>
+        <td><input type="text" value="JUMLAH"></td>
+        <td><input type="text" value="IDR" readonly></td>
+        <td><input type="text" value="NO NODINMU"></td>
+        <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
+    `;
+
+    tableBody.appendChild(newRow);
+
+    // Populate the new row's Reason Type dropdown
+    updateReasonTypeFilter();
+}
+
+// Function to remove a row
+function removeRow(button) {
+    let row = button.parentNode.parentNode;
+    row.remove();
+}
         
             // Fungsi untuk mengupdate dropdown Reason Type berdasarkan Account Type
            // Fungsi untuk mengupdate dropdown Reason Type berdasarkan Account Type
