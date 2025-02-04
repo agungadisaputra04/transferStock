@@ -259,81 +259,97 @@ label {
             
         </div>
         <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const tableBody = document.getElementById("table-body");
-    const addRowBtn = document.getElementById("add-row");
-    let referenceData = [];
-    
-    // Fetch reference data
-    fetch('refrensi.json')
-        .then(response => response.json())
-        .then(data => {
-            referenceData = data;
-        })
-        .catch(error => console.error('Error loading reference data:', error));
+let referenceData = []; // Store reference JSON data
 
-    function updateDropdowns() {
-        let reasonTypeSelects = document.querySelectorAll(".reason-type");
-        let selectedAccountType = document.getElementById("accountTypeFilter")?.value || "";
-        
-        reasonTypeSelects.forEach(select => {
-            let previousValue = select.value;
-            select.innerHTML = "<option value=''>Select Reason</option>";
-            
-            let filteredReasons = referenceData
-                .filter(item => item["Account Type"] === selectedAccountType)
-                .map(item => item["Reason Type"]);
-            
-            let uniqueReasons = [...new Set(filteredReasons)];
-            uniqueReasons.forEach(reason => {
-                let option = document.createElement("option");
-                option.value = reason;
-                option.textContent = reason;
-                select.appendChild(option);
-            });
-            
-            if (uniqueReasons.includes(previousValue)) {
-                select.value = previousValue;
+fetch('refrensi.json')
+    .then(response => response.json())
+    .then(data => {
+        referenceData = data;
+        let select = document.getElementById("accountTypeFilter");
+        let uniqueAccountTypes = [...new Set(data.map(item => item["Account Type"]))];
+
+        uniqueAccountTypes.forEach(accountType => {
+            let opt = document.createElement("option");
+            opt.value = accountType;
+            opt.textContent = accountType;
+            select.appendChild(opt);
+        });
+    })
+    .catch(error => console.error('Error loading preferences:', error));
+
+ 
+    function updateReasonTypeFilter() {
+    let selectedAccountType = document.getElementById("accountTypeFilter").value;
+    let rows = document.querySelectorAll("#inputTableBody tr");
+
+    rows.forEach(row => {
+        let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
+        let previousSelectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
+
+        // Ambil semua Reason Type yang cocok dengan Account Type terpilih
+        let filteredReasons = referenceData
+            .filter(item => item["Account Type"] === selectedAccountType)
+            .map(item => item["Reason Type"]);
+
+        let uniqueReasons = [...new Set(filteredReasons)];
+
+        // Hapus opsi yang tidak ada dalam uniqueReasons
+        let existingOptions = Array.from(reasonTypeSelect.options).map(opt => opt.value);
+        existingOptions.forEach(optValue => {
+            if (!uniqueReasons.includes(optValue)) {
+                let optToRemove = reasonTypeSelect.querySelector(`option[value="${optValue}"]`);
+                if (optToRemove) optToRemove.remove();
             }
         });
-    }
-    
-    function addRow() {
-        let newRow = document.createElement("tr");
-        newRow.innerHTML = `
-            <td><input type="text" class="alias"></td>
-            <td>
-                <select class="reason-type">
-                    <option value="">Select Reason</option>
-                </select>
-            </td>
-            <td><input type="text" class="other-input"></td>
-            <td><button class="delete-row">Delete</button></td>
-        `;
-        
-        tableBody.appendChild(newRow);
-        updateDropdowns();
-    }
-    
-    addRowBtn.addEventListener("click", addRow);
-    
-    tableBody.addEventListener("click", function (e) {
-        if (e.target.classList.contains("delete-row")) {
-            e.target.closest("tr").remove();
-            updateDropdowns();
-        }
-    });
-    
-    tableBody.addEventListener("change", function (e) {
-        if (e.target.classList.contains("reason-type")) {
-            updateDropdowns();
-        }
-    });
-    
-    document.getElementById("accountTypeFilter")?.addEventListener("change", updateDropdowns);
-    addRow();
-});
 
+        // Tambahkan opsi baru jika belum ada
+        uniqueReasons.forEach(reason => {
+            if (!existingOptions.includes(reason)) {
+                let opt = document.createElement("option");
+                opt.value = reason;
+                opt.textContent = reason;
+                reasonTypeSelect.appendChild(opt);
+            }
+        });
+
+        // Kembalikan pilihan sebelumnya jika masih valid
+        if (uniqueReasons.includes(previousSelectedValue)) {
+            reasonTypeSelect.value = previousSelectedValue;
+        } else {
+            reasonTypeSelect.value = ""; // Kosongkan jika opsi tidak valid
+        }
+    });
+}
+
+
+function addRow() {
+    let tableBody = document.getElementById("inputTableBody");
+    let newRow = document.createElement("tr");
+
+    newRow.innerHTML = `
+        <td>
+            <select class="reasonTypeSelect"></select>
+        </td>
+        <td><input type="text" value="ShortCode" readonly></td>
+        <td><input type="text" value="SC AWAL"></td>
+        <td><input type="text" value="ShortCode" readonly></td>
+        <td><input type="text" value="SC TUJUAN"></td>
+        <td><input type="text" value="JUMLAH"></td>
+        <td><input type="text" value="IDR" readonly></td>
+        <td><input type="text" value="NO NODINMU"></td>
+        <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
+    `;
+
+    tableBody.appendChild(newRow);
+    updateReasonTypeFilter(); // Update dropdown pada baris yang baru ditambahkan
+}
+
+
+// Function untuk menghapus baris
+function removeRow(button) {
+    let row = button.parentNode.parentNode;
+    row.remove();
+}
 
 function saveTempData(index, value) {
     tempData[index] = value;
@@ -347,30 +363,34 @@ function updateReasonTypeFilter() {
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
         let previousSelectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
 
-        // Hapus opsi lama dan tambahkan default option
-        reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
-
-        // Filter Reason Type berdasarkan Account Type yang dipilih
+        // Ambil semua Reason Type yang sesuai dengan Account Type terpilih
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
         let uniqueReasons = [...new Set(filteredReasons)];
 
-        // Tambahkan opsi baru ke dropdown
-        uniqueReasons.forEach(reason => {
-            let opt = document.createElement("option");
-            opt.value = reason;
-            opt.textContent = reason;
-            reasonTypeSelect.appendChild(opt);
-        });
+        // Cek apakah opsi yang ada sekarang sudah sama dengan opsi yang ingin dimasukkan
+        let currentOptions = Array.from(reasonTypeSelect.options).map(opt => opt.value);
+        if (JSON.stringify(currentOptions) !== JSON.stringify(["", ...uniqueReasons])) {
+            // Hanya update dropdown jika ada perubahan pada opsi
+            reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
 
-        // Kembalikan pilihan sebelumnya jika masih valid
-        if (uniqueReasons.includes(previousSelectedValue)) {
-            reasonTypeSelect.value = previousSelectedValue;
+            uniqueReasons.forEach(reason => {
+                let opt = document.createElement("option");
+                opt.value = reason;
+                opt.textContent = reason;
+                reasonTypeSelect.appendChild(opt);
+            });
+
+            // Kembalikan pilihan sebelumnya jika masih valid
+            if (uniqueReasons.includes(previousSelectedValue)) {
+                reasonTypeSelect.value = previousSelectedValue;
+            }
         }
     });
 }
+
 
         
             // Function to process the data and populate the output table
