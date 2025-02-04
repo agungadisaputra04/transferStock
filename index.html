@@ -259,83 +259,72 @@ label {
             
         </div>
         <script>
-let referenceData = [];
-let lastSelectedAccountType = ""; // Menyimpan filter terakhir untuk Account Type
+    let referenceData = [];
+        let selectedAccountType = "";
 
-// Fetch data dari JSON dan isi dropdown Account Type di awal
-fetch('refrensi.json')
-    .then(response => response.json())
-    .then(data => {
-        referenceData = data;
-        let select = document.getElementById("accountTypeFilter");
-        let accountTypes = [...new Set(data.map(item => item["Account Type"]))];
-        
-        accountTypes.forEach(type => {
-            let opt = document.createElement("option");
-            opt.value = type;
-            opt.textContent = type;
-            select.appendChild(opt);
-        });
-    })
-    .catch(error => console.error('Error loading preferences:', error));
+        fetch('refrensi.json')
+            .then(response => response.json())
+            .then(data => {
+                referenceData = data;
+                let accountTypes = [...new Set(data.map(item => item["Account Type"]))];
+                let accountTypeFilter = document.getElementById("accountTypeFilter");
+                accountTypes.forEach(type => {
+                    let opt = document.createElement("option");
+                    opt.value = type;
+                    opt.textContent = type;
+                    accountTypeFilter.appendChild(opt);
+                });
+            })
+            .catch(error => console.error('Error loading preferences:', error));
 
-// Fungsi update Reason Type berdasarkan Account Type
-function updateReasonTypeFilter() {
-    let selectedAccountType = document.getElementById("accountTypeFilter").value;
-    lastSelectedAccountType = selectedAccountType; // Simpan pilihan terakhir
-    
-    let reasonTypeSelects = document.querySelectorAll(".reasonTypeSelect");
-    reasonTypeSelects.forEach(select => {
-        updateReasonTypeOptions(select, selectedAccountType);
-    });
-}
+        function updateReasonTypeFilter() {
+            selectedAccountType = document.getElementById("accountTypeFilter").value;
+            let rows = document.querySelectorAll(".reasonTypeSelect");
+            rows.forEach(select => populateReasonType(select, selectedAccountType));
+        }
 
-// Fungsi untuk mengupdate dropdown Reason Type di tiap baris
-function updateReasonTypeOptions(selectElement, accountType) {
-    selectElement.innerHTML = '<option value="">Pilih Reason Type</option>';
-    
-    let filteredReasons = referenceData
-        .filter(item => item["Account Type"] === accountType)
-        .map(item => item["Reason Type"]);
-    
-    [...new Set(filteredReasons)].forEach(reason => {
-        let opt = document.createElement("option");
-        opt.value = reason;
-        opt.textContent = reason;
-        selectElement.appendChild(opt);
-    });
-}
+        function populateReasonType(selectElement, accountType) {
+            let previousValue = selectElement.value;
+            selectElement.innerHTML = '<option value="">Pilih Reason Type</option>';
+            let filteredReasons = referenceData
+                .filter(item => item["Account Type"] === accountType)
+                .map(item => item["Reason Type"]);
+            [...new Set(filteredReasons)].forEach(reason => {
+                let opt = document.createElement("option");
+                opt.value = reason;
+                opt.textContent = reason;
+                selectElement.appendChild(opt);
+            });
+            if ([...selectElement.options].some(opt => opt.value === previousValue)) {
+                selectElement.value = previousValue;
+            }
+        }
 
-// Function to add a new row to the input table
-function addRow() {
-    let tableBody = document.getElementById("inputTableBody");
-    let newRow = document.createElement("tr");
+        function addRow() {
+            let tableBody = document.getElementById("inputTableBody");
+            let newRow = document.createElement("tr");
+            newRow.innerHTML = `
+                <td>
+                    <select class="reasonTypeSelect"></select>
+                </td>
+                <td><input type="text" value="ShortCode" readonly></td>
+                <td><input type="text" value="00301"></td>
+                <td><input type="text" value="ShortCode" readonly></td>
+                <td><input type="text" value="TELKOMSEL"></td>
+                <td><input type="text" value="18252000000"></td>
+                <td><input type="text" value="IDR"></td>
+                <td><input type="text" value="0141/MK.03/PC-44/IX/2024"></td>
+                <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
+            `;
+            tableBody.appendChild(newRow);
+            let reasonTypeSelect = newRow.querySelector(".reasonTypeSelect");
+            populateReasonType(reasonTypeSelect, selectedAccountType);
+        }
 
-    newRow.innerHTML = `
-        <td>
-            <select class="reasonTypeSelect"></select>
-        </td>
-        <td><input type="text" value="ShortCode" readonly></td>
-        <td><input type="text" value="00301"></td>
-        <td><input type="text" value="ShortCode" readonly></td>
-        <td><input type="text" value="TELKOMSEL"></td>
-        <td><input type="text" value="18252000000"></td>
-        <td><input type="text" value="IDR"></td>
-        <td><input type="text" value="0141/MK.03/PC-44/IX/2024"></td>
-        <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
-    `;
-
-    tableBody.appendChild(newRow);
-    
-    let reasonTypeSelect = newRow.querySelector(".reasonTypeSelect");
-    updateReasonTypeOptions(reasonTypeSelect, lastSelectedAccountType); // Gunakan filter terakhir
-}
-
-// Function to remove a row from the table
-function removeRow(button) {
-    let row = button.parentNode.parentNode;
-    row.remove();
-}
+        function removeRow(button) {
+            let row = button.parentNode.parentNode;
+            row.remove();
+        }
 
 
 
