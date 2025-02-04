@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Processor</title>
+    <title>TF STOCK CUY</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -14,18 +14,14 @@
             color: #333;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-
-        h2, h3 {
-            color: #2a2a2a;
-        }
-
+    
         h1 {
             color: #333;
             font-size: 2em;
             text-align: center;
             margin-bottom: 20px;
         }
-
+    
         table {
             width: 100%;
             border-collapse: collapse;
@@ -35,123 +31,170 @@
             border-radius: 8px;
             overflow: hidden;
         }
-
+    
         th, td {
             padding: 12px;
             text-align: left;
         }
-
+    
         th {
-            background-color: #4CAF50;
+            background-color:    #64329c;
             color: white;
         }
-
+    
         td {
             border-top: 1px solid #ddd;
         }
-
+    
+        /* Styling buttons */
         button {
             padding: 10px 20px;
             margin: 10px 0;
             cursor: pointer;
             border: none;
             border-radius: 5px;
-            background-color: #4CAF50;
+            background-color:  #64329c;
             color: white;
             font-weight: bold;
             transition: background-color 0.3s ease;
         }
-
+    
         button:hover {
-            background-color: #45a049;
+            background-color:  #904be0;
         }
-
+    
         .remove-btn {
             background-color: #e74c3c;
             color: white;
         }
-
+    
         .remove-btn:hover {
             background-color: #c0392b;
         }
-
+    
         .add-btn {
             background-color: #3498db;
             color: white;
+         
         }
-
+    
         .add-btn:hover {
             background-color: #2980b9;
         }
-
+    
         .action-buttons {
             margin-top: 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
         }
-
+    
         .scrollable-table {
             max-height: 300px;
             overflow-y: auto;
             display: block;
         }
-
+    
+        /* Input and Select styling */
+        input[type="text"], select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+    
+        input[type="text"]:focus, select:focus {
+            border-color: #7417df;
+            box-shadow: 0 0 5px #7417df;
+        }
+    
+        select {
+            background-color: #f9f9f9;
+        }
+    
+        /* Dark Mode Adjustments */
         .dark-mode {
-            background-color: #181818;
-            color: #f1f1f1;
+            background-color: #333;
+            color: #fff;
         }
-
-        .dark-mode h1, .dark-mode h2, .dark-mode h3 {
-            color: #f1f1f1;
-        }
-
+    
         .dark-mode table {
-            background-color: #2e2e2e;
+            background-color: #555;
         }
-
+    
         .dark-mode th {
-            background-color: #3a3a3a;
-            color: #f1f1f1;
+            background-color: #444;
         }
-
+    
         .dark-mode td {
-            background-color: #3c3c3c;
-            color: #f1f1f1;
+            background-color: #666;
+            color: #fff;
         }
-
-        .dark-mode button {
-            background-color: #2e2e2e;
-            color: #f1f1f1;
+    
+        .dark-mode input[type="text"], .dark-mode select {
+            background-color: #555;
+            color: #fff;
+            border-color: #777;
         }
-
-        .dark-mode button:hover {
-            background-color: #434343;
+    
+        .dark-mode input[type="text"]:focus, .dark-mode select:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.6);
         }
-
-        .dark-mode .remove-btn {
-            background-color: #c0392b;
-        }
-
-        .dark-mode .remove-btn:hover {
-            background-color: #9b2d1e;
-        }
-
-        .dark-mode .add-btn {
-            background-color: #2980b9;
-        }
-
-        .dark-mode .add-btn:hover {
-            background-color: #1c6a8c;
-        }
-
+        .action-buttons button {
+        margin-right: 10px; 
+    }
     </style>
-</head>
-<body>
-    <h1>Welcome to the Data Processor!</h1>
-    <div class="container">
-        <h2>Input Data</h2>
-        <div class="scrollable-table">
-            <table id="inputTable">
+    
+    <body>
+        <h1>GAS TF STOCK!</h1>
+        <div class="action-buttons">
+            <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        </div>
+        <div class="container">
+            <h2>Input Transfer Stock</h2>
+            <div class="scrollable-table">
+                <table id="inputTable">
+                    <thead>
+                        <tr>
+                            <th>ReasonType Alias</th>
+                            <th>Debit IdentifierType</th>
+                            <th>Debit IdentifierValue</th>
+                            <th>Credit IdentifierType</th>
+                            <th>Credit IdentifierValue</th>
+                            <th>Amount</th>
+                            <th>Currency</th>
+                            <th>Comment</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inputTableBody">
+                        <tr>
+                            <td>
+                                <select id="reasonTypeSelect"></select>
+                            </td>
+                            <td><input type="text" value="ShortCode" readonly></td>
+                            <td><input type="text" value="00301"></td>
+                            <td><input type="text" value="ShortCode" readonly></td>
+                            <td><input type="text" value="TELKOMSEL"></td>
+                            <td><input type="text" value="18252000000"></td>
+                            <td><input type="text" value="IDR" readonly></td>
+                            <td><input type="text" value="0141/MK.03/PC-44/IX/2024"></td>
+                            <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+    
+            <div class="action-buttons">
+                <button class="add-btn" onclick="addRow()">Tambah Gas</button>
+                <button onclick="processData()">Proses Data</button>
+            </div>
+    
+            <h2>Review Data Transfer Stock</h2>
+            <table id="outputTable">
                 <thead>
                     <tr>
                         <th>ReasonType Alias</th>
@@ -162,64 +205,21 @@
                         <th>Amount</th>
                         <th>Currency</th>
                         <th>Comment</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="inputTableBody">
-                    <tr>
-                        <td>
-                            <select id="reasonTypeSelect"></select>
-                        </td>
-                        <td><input type="text" value="ShortCode" readonly></td>
-                        <td><input type="text" value="00301"></td>
-                        <td><input type="text" value="ShortCode" readonly></td>
-                        <td><input type="text" value="TELKOMSEL"></td>
-                        <td><input type="text" value="18252000000"></td>
-                        <td><input type="text" value="IDR"></td>
-                        <td><input type="text" value="0141/MK.03/PC-44/IX/2024"></td>
-                        <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
-                    </tr>
-                </tbody>
+                <tbody></tbody>
             </table>
+    
+            <div class="action-buttons">
+                <button onclick="downloadCSV()">Download CSV</button>
+            </div>
+    
+            <h3>Review CSV Format</h3>
+            <pre id="csvPreview"></pre> 
+            
+           
         </div>
-
-        <div class="action-buttons">
-            <button class="add-btn" onclick="addRow()">Tambah Data</button>
-            <button onclick="processData()">Proses Data</button>
-        </div>
-
-        <h2>Review Data Output</h2>
-        <table id="outputTable">
-            <thead>
-                <tr>
-                    <th>ReasonType Alias</th>
-                    <th>Debit IdentifierType</th>
-                    <th>Debit IdentifierValue</th>
-                    <th>Credit IdentifierType</th>
-                    <th>Credit IdentifierValue</th>
-                    <th>Amount</th>
-                    <th>Currency</th>
-                    <th>Comment</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <div class="action-buttons">
-            <button onclick="downloadCSV()">Download CSV</button>
-        </div>
-
-        <h3>Review CSV Format</h3>
-        <pre id="csvPreview"></pre> <!-- Display the CSV format here -->
-        
-        <!-- Dark/Light Mode Toggle -->
-        <div class="action-buttons">
-            <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
-        </div>
-    </div>
-
     <script>
-        // Fetch ReasonType options from the refrensi.json file
         fetch('refrensi.json')
             .then(response => response.json())
             .then(data => {
