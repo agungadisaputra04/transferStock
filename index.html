@@ -259,73 +259,87 @@ label {
             
         </div>
         <script>
-    let referenceData = [];
-        let selectedAccountType = "";
+let referenceData = [];
+let selectedAccountType = "";
 
-        fetch('refrensi.json')
-            .then(response => response.json())
-            .then(data => {
-                referenceData = data;
-                let accountTypes = [...new Set(data.map(item => item["Account Type"]))];
-                let accountTypeFilter = document.getElementById("accountTypeFilter");
-                accountTypes.forEach(type => {
-                    let opt = document.createElement("option");
-                    opt.value = type;
-                    opt.textContent = type;
-                    accountTypeFilter.appendChild(opt);
-                });
-            })
-            .catch(error => console.error('Error loading preferences:', error));
+fetch('refrensi.json')
+    .then(response => response.json())
+    .then(data => {
+        referenceData = data;
+        let accountTypes = [...new Set(data.map(item => item["Account Type"]))];
+        let accountTypeFilter = document.getElementById("accountTypeFilter");
+        accountTypes.forEach(type => {
+            let opt = document.createElement("option");
+            opt.value = type;
+            opt.textContent = type;
+            accountTypeFilter.appendChild(opt);
+        });
+    })
+    .catch(error => console.error('Error loading preferences:', error));
 
-        function updateReasonTypeFilter() {
-            selectedAccountType = document.getElementById("accountTypeFilter").value;
-            let rows = document.querySelectorAll(".reasonTypeSelect");
-            rows.forEach(select => populateReasonType(select, selectedAccountType));
+function updateReasonTypeFilter() {
+    selectedAccountType = document.getElementById("accountTypeFilter").value;
+    let rows = document.querySelectorAll("#inputTableBody tr");
+
+    rows.forEach((row, index) => {
+        let select = row.querySelector(".reasonTypeSelect");
+        if (!row.dataset.locked) { // Hanya update dropdown jika row belum dikunci
+            populateReasonType(select, selectedAccountType);
         }
+    });
+}
 
-        function populateReasonType(selectElement, accountType) {
-            let previousValue = selectElement.value;
-            selectElement.innerHTML = '<option value="">Pilih Reason Type</option>';
-            let filteredReasons = referenceData
-                .filter(item => item["Account Type"] === accountType)
-                .map(item => item["Reason Type"]);
-            [...new Set(filteredReasons)].forEach(reason => {
-                let opt = document.createElement("option");
-                opt.value = reason;
-                opt.textContent = reason;
-                selectElement.appendChild(opt);
-            });
-            if ([...selectElement.options].some(opt => opt.value === previousValue)) {
-                selectElement.value = previousValue;
-            }
-        }
+function populateReasonType(selectElement, accountType) {
+    let previousValue = selectElement.value;
+    selectElement.innerHTML = '<option value="">Pilih Reason Type</option>';
+    let filteredReasons = referenceData
+        .filter(item => item["Account Type"] === accountType)
+        .map(item => item["Reason Type"]);
 
-        function addRow() {
-            let tableBody = document.getElementById("inputTableBody");
-            let newRow = document.createElement("tr");
-            newRow.innerHTML = `
-                <td>
-                    <select class="reasonTypeSelect"></select>
-                </td>
-                <td><input type="text" value="ShortCode" readonly></td>
-                <td><input type="text" value="00301"></td>
-                <td><input type="text" value="ShortCode" readonly></td>
-                <td><input type="text" value="TELKOMSEL"></td>
-                <td><input type="text" value="18252000000"></td>
-                <td><input type="text" value="IDR"></td>
-                <td><input type="text" value="0141/MK.03/PC-44/IX/2024"></td>
-                <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
-            `;
-            tableBody.appendChild(newRow);
-            let reasonTypeSelect = newRow.querySelector(".reasonTypeSelect");
-            populateReasonType(reasonTypeSelect, selectedAccountType);
-        }
+    [...new Set(filteredReasons)].forEach(reason => {
+        let opt = document.createElement("option");
+        opt.value = reason;
+        opt.textContent = reason;
+        selectElement.appendChild(opt);
+    });
 
-        function removeRow(button) {
-            let row = button.parentNode.parentNode;
-            row.remove();
-        }
+    if ([...selectElement.options].some(opt => opt.value === previousValue)) {
+        selectElement.value = previousValue;
+    }
+}
 
+function addRow() {
+    let tableBody = document.getElementById("inputTableBody");
+    let newRow = document.createElement("tr");
+
+    newRow.innerHTML = `
+        <td><select class="reasonTypeSelect"></select></td>
+        <td><input type="text" value="ShortCode" readonly></td>
+        <td><input type="text" value="00301"></td>
+        <td><input type="text" value="ShortCode" readonly></td>
+        <td><input type="text" value="TELKOMSEL"></td>
+        <td><input type="text" value="18252000000"></td>
+        <td><input type="text" value="IDR"></td>
+        <td><input type="text" value="0141/MK.03/PC-44/IX/2024"></td>
+        <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
+    `;
+
+    let reasonTypeSelect = newRow.querySelector(".reasonTypeSelect");
+    populateReasonType(reasonTypeSelect, selectedAccountType);
+    
+    // Baris ini tidak dikunci, jadi masih bisa berubah jika filter diubah
+    tableBody.appendChild(newRow);
+    
+    // Tandai semua baris sebelumnya agar tidak berubah
+    document.querySelectorAll("#inputTableBody tr").forEach(row => {
+        row.dataset.locked = "true"; // Tandai agar tidak berubah lagi
+    });
+}
+
+function removeRow(button) {
+    let row = button.parentNode.parentNode;
+    row.remove();
+}
 
 
 function lockAccountType() {
