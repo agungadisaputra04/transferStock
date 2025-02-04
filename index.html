@@ -277,6 +277,7 @@ fetch('refrensi.json')
     })
     .catch(error => console.error('Error loading preferences:', error));
 
+ 
     function updateReasonTypeFilter() {
     let selectedAccountType = document.getElementById("accountTypeFilter").value;
     let rows = document.querySelectorAll("#inputTableBody tr");
@@ -285,16 +286,25 @@ fetch('refrensi.json')
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
         let previousSelectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
 
-        // Jangan hapus opsi lama, hanya tambahkan opsi baru berdasarkan Account Type
+        // Ambil semua Reason Type yang cocok dengan Account Type terpilih
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
         let uniqueReasons = [...new Set(filteredReasons)];
 
-        // Hanya tambahkan opsi jika belum ada di dropdown
+        // Hapus opsi yang tidak ada dalam uniqueReasons
+        let existingOptions = Array.from(reasonTypeSelect.options).map(opt => opt.value);
+        existingOptions.forEach(optValue => {
+            if (!uniqueReasons.includes(optValue)) {
+                let optToRemove = reasonTypeSelect.querySelector(`option[value="${optValue}"]`);
+                if (optToRemove) optToRemove.remove();
+            }
+        });
+
+        // Tambahkan opsi baru jika belum ada
         uniqueReasons.forEach(reason => {
-            if (!Array.from(reasonTypeSelect.options).some(opt => opt.value === reason)) {
+            if (!existingOptions.includes(reason)) {
                 let opt = document.createElement("option");
                 opt.value = reason;
                 opt.textContent = reason;
@@ -305,9 +315,13 @@ fetch('refrensi.json')
         // Kembalikan pilihan sebelumnya jika masih valid
         if (uniqueReasons.includes(previousSelectedValue)) {
             reasonTypeSelect.value = previousSelectedValue;
+        } else {
+            reasonTypeSelect.value = ""; // Kosongkan jika opsi tidak valid
         }
     });
 }
+
+
 function addRow() {
     let tableBody = document.getElementById("inputTableBody");
     let newRow = document.createElement("tr");
@@ -327,8 +341,9 @@ function addRow() {
     `;
 
     tableBody.appendChild(newRow);
-    updateReasonTypeFilter(); // Pastikan dropdown baru juga diupdate tanpa mereset
+    updateReasonTypeFilter(); // Update dropdown pada baris yang baru ditambahkan
 }
+
 
 // Function untuk menghapus baris
 function removeRow(button) {
