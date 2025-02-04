@@ -285,22 +285,21 @@ fetch('refrensi.json')
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
         let previousSelectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
 
-        // Hapus opsi lama dan tambahkan default option
-        reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
-
-        // Filter Reason Type berdasarkan Account Type yang dipilih
+        // Jangan hapus opsi lama, hanya tambahkan opsi baru berdasarkan Account Type
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
         let uniqueReasons = [...new Set(filteredReasons)];
 
-        // Tambahkan opsi baru ke dropdown
+        // Hanya tambahkan opsi jika belum ada di dropdown
         uniqueReasons.forEach(reason => {
-            let opt = document.createElement("option");
-            opt.value = reason;
-            opt.textContent = reason;
-            reasonTypeSelect.appendChild(opt);
+            if (!Array.from(reasonTypeSelect.options).some(opt => opt.value === reason)) {
+                let opt = document.createElement("option");
+                opt.value = reason;
+                opt.textContent = reason;
+                reasonTypeSelect.appendChild(opt);
+            }
         });
 
         // Kembalikan pilihan sebelumnya jika masih valid
@@ -309,8 +308,6 @@ fetch('refrensi.json')
         }
     });
 }
-
-// Fungsi untuk menambah baris baru
 function addRow() {
     let tableBody = document.getElementById("inputTableBody");
     let newRow = document.createElement("tr");
