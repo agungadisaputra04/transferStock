@@ -350,16 +350,19 @@ function updateReasonTypeFilter() {
 
     rows.forEach(row => {
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
-        let currentSelectedValue = reasonTypeSelect.value; // Simpan pilihan yang sudah ada
+        let previousSelectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
 
+        // Hapus opsi lama dan tambahkan default option
         reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
 
+        // Filter Reason Type berdasarkan Account Type yang dipilih
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
         let uniqueReasons = [...new Set(filteredReasons)];
 
+        // Tambahkan opsi baru ke dropdown
         uniqueReasons.forEach(reason => {
             let opt = document.createElement("option");
             opt.value = reason;
@@ -367,12 +370,13 @@ function updateReasonTypeFilter() {
             reasonTypeSelect.appendChild(opt);
         });
 
-        // Kembalikan pilihan sebelumnya jika masih ada di opsi baru
-        if (uniqueReasons.includes(currentSelectedValue)) {
-            reasonTypeSelect.value = currentSelectedValue;
+        // Kembalikan pilihan sebelumnya jika masih valid
+        if (uniqueReasons.includes(previousSelectedValue)) {
+            reasonTypeSelect.value = previousSelectedValue;
         }
     });
 }
+
         
             // Function to process the data and populate the output table
             function processData() {
