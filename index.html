@@ -304,14 +304,22 @@ function updateReasonTypeFilter() {
         });
     });
 }
-
 function addRow() {
     let tableBody = document.getElementById("inputTableBody");
+    let rows = tableBody.querySelectorAll("tr"); // Ambil semua baris sebelum menambah baris baru
+
+    // Kunci semua input & select pada baris yang sudah ada
+    rows.forEach(row => {
+        row.querySelectorAll("input, select").forEach(input => {
+            input.disabled = true;
+        });
+    });
+
     let newRow = document.createElement("tr");
 
     newRow.innerHTML = `
         <td>
-            <select class="reasonTypeSelect" onchange="lockAccountType()"></select>
+            <select class="reasonTypeSelect"></select>
         </td>
         <td><input type="text" value="ShortCode" readonly></td>
         <td><input type="text" value="SC AWAL"></td>
@@ -324,8 +332,7 @@ function addRow() {
     `;
 
     tableBody.appendChild(newRow);
-    updateReasonTypeFilter();
-}
+    updateReasonTypeFilter(); // Perbarui dropdown Reason Type sesuai Account Type yang dipilih
 
 function removeRow(button) {
     let row = button.parentNode.parentNode;
