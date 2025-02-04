@@ -277,18 +277,18 @@ fetch('refrensi.json')
     })
     .catch(error => console.error('Error loading preferences:', error));
 
-function updateReasonTypeFilter() {
+    function updateReasonTypeFilter() {
     let selectedAccountType = document.getElementById("accountTypeFilter").value;
     let rows = document.querySelectorAll("#inputTableBody tr");
 
     rows.forEach(row => {
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
-        let selectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
+        let previousSelectedValue = reasonTypeSelect.value; // Simpan pilihan sebelumnya
 
-        // Kosongkan dropdown dulu
+        // Hapus opsi lama dan tambahkan default option
         reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
 
-        // Ambil Reason Type berdasarkan Account Type yang dipilih
+        // Filter Reason Type berdasarkan Account Type yang dipilih
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
@@ -304,11 +304,13 @@ function updateReasonTypeFilter() {
         });
 
         // Kembalikan pilihan sebelumnya jika masih valid
-      
+        if (uniqueReasons.includes(previousSelectedValue)) {
+            reasonTypeSelect.value = previousSelectedValue;
+        }
     });
 }
 
-// Function untuk menambah baris baru
+// Fungsi untuk menambah baris baru
 function addRow() {
     let tableBody = document.getElementById("inputTableBody");
     let newRow = document.createElement("tr");
