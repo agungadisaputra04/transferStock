@@ -259,7 +259,7 @@ label {
             
         </div>
         <script>
- let referenceData = []; // Store reference JSON data
+let referenceData = []; // Store reference JSON data
 
 // Fetch data from refrensi.json and populate Account Type dropdown
 fetch('refrensi.json')
@@ -267,7 +267,7 @@ fetch('refrensi.json')
     .then(data => {
         referenceData = data;
         let select = document.getElementById("accountTypeFilter");
-        let uniqueAccountTypes = [...new Set(data.map(item => item["Account Type"]))]; // Get unique Account Types
+        let uniqueAccountTypes = [...new Set(data.map(item => item["Account Type"]))];
 
         uniqueAccountTypes.forEach(accountType => {
             let opt = document.createElement("option");
@@ -276,7 +276,7 @@ fetch('refrensi.json')
             select.appendChild(opt);
         });
     })
-    .catch(error => console.error('Error loading preferences:', error));
+    .catch(error => console.error('Error loading references:', error));
 
 // Function to update Reason Type dropdown based on selected Account Type
 function updateReasonTypeFilter() {
@@ -285,11 +285,9 @@ function updateReasonTypeFilter() {
 
     rows.forEach(row => {
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
+        let previousValue = reasonTypeSelect.value;
 
-        // Store the current selected value before updating
-        let selectedValue = reasonTypeSelect.value;
-
-        // Clear existing options
+        // Clear options but keep default
         reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
 
         // Get unique Reason Types based on selected Account Type
@@ -298,7 +296,6 @@ function updateReasonTypeFilter() {
             .map(item => item["Reason Type"]);
         let uniqueReasons = [...new Set(filteredReasons)];
 
-        // Add options to dropdown
         uniqueReasons.forEach(reason => {
             let opt = document.createElement("option");
             opt.value = reason;
@@ -306,9 +303,9 @@ function updateReasonTypeFilter() {
             reasonTypeSelect.appendChild(opt);
         });
 
-        // Restore previously selected value if it is still valid
-        if (uniqueReasons.includes(selectedValue)) {
-            reasonTypeSelect.value = selectedValue;
+        // Restore previous selection if still valid
+        if (uniqueReasons.includes(previousValue)) {
+            reasonTypeSelect.value = previousValue;
         }
     });
 }
@@ -333,8 +330,6 @@ function addRow() {
     `;
 
     tableBody.appendChild(newRow);
-
-    // Populate the new row's Reason Type dropdown
     updateReasonTypeFilter();
 }
 
