@@ -259,16 +259,16 @@ label {
             
         </div>
         <script>
-let referenceData = []; // Store reference JSON data
+let referenceData = [];
+let tempData = {}; // Object untuk menyimpan data sementara
 
-// Fetch data from refrensi.json and populate Account Type dropdown
 fetch('refrensi.json')
     .then(response => response.json())
     .then(data => {
         referenceData = data;
         let select = document.getElementById("accountTypeFilter");
         let uniqueAccountTypes = [...new Set(data.map(item => item["Account Type"]))];
-
+        
         uniqueAccountTypes.forEach(accountType => {
             let opt = document.createElement("option");
             opt.value = accountType;
@@ -276,24 +276,22 @@ fetch('refrensi.json')
             select.appendChild(opt);
         });
     })
-    .catch(error => console.error('Error loading references:', error));
+    .catch(error => console.error('Error loading preferences:', error));
 
-// Function to update Reason Type dropdown based on selected Account Type
 function updateReasonTypeFilter() {
     let selectedAccountType = document.getElementById("accountTypeFilter").value;
     let rows = document.querySelectorAll("#inputTableBody tr");
 
-    rows.forEach(row => {
+    rows.forEach((row, index) => {
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
-        let previousValue = reasonTypeSelect.value;
-
-        // Clear options but keep default
+        let previousSelectedValue = reasonTypeSelect.value;
+        
         reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
 
-        // Get unique Reason Types based on selected Account Type
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
+
         let uniqueReasons = [...new Set(filteredReasons)];
 
         uniqueReasons.forEach(reason => {
@@ -303,21 +301,22 @@ function updateReasonTypeFilter() {
             reasonTypeSelect.appendChild(opt);
         });
 
-        // Restore previous selection if still valid
-        if (uniqueReasons.includes(previousValue)) {
-            reasonTypeSelect.value = previousValue;
+        if (tempData[index] && uniqueReasons.includes(tempData[index])) {
+            reasonTypeSelect.value = tempData[index];
+        } else if (uniqueReasons.includes(previousSelectedValue)) {
+            reasonTypeSelect.value = previousSelectedValue;
         }
     });
 }
 
-// Function to add a new row
 function addRow() {
     let tableBody = document.getElementById("inputTableBody");
     let newRow = document.createElement("tr");
+    let rowIndex = tableBody.rows.length;
 
     newRow.innerHTML = `
         <td>
-            <select class="reasonTypeSelect"></select>
+            <select class="reasonTypeSelect" onchange="saveTempData(${rowIndex}, this.value)"></select>
         </td>
         <td><input type="text" value="ShortCode" readonly></td>
         <td><input type="text" value="SC AWAL"></td>
@@ -326,17 +325,20 @@ function addRow() {
         <td><input type="text" value="JUMLAH"></td>
         <td><input type="text" value="IDR" readonly></td>
         <td><input type="text" value="NO NODINMU"></td>
-        <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
+        <td><button class="remove-btn" onclick="removeRow(this, ${rowIndex})">Hapus</button></td>
     `;
-
     tableBody.appendChild(newRow);
     updateReasonTypeFilter();
 }
 
-// Function to remove a row
-function removeRow(button) {
+function removeRow(button, index) {
     let row = button.parentNode.parentNode;
     row.remove();
+    delete tempData[index];
+}
+
+function saveTempData(index, value) {
+    tempData[index] = value;
 }
         
 function updateReasonTypeFilter() {
