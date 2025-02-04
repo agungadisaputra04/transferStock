@@ -262,6 +262,7 @@ label {
 let referenceData = [];
 let selectedAccountType = "";
 
+// Fetch data untuk dropdown
 fetch('refrensi.json')
     .then(response => response.json())
     .then(data => {
@@ -277,18 +278,22 @@ fetch('refrensi.json')
     })
     .catch(error => console.error('Error loading preferences:', error));
 
+// Simpan filter yang dipilih
 function updateReasonTypeFilter() {
     selectedAccountType = document.getElementById("accountTypeFilter").value;
+    updateExistingRows(); // Update baris yang sudah ada
 }
 
+// Populate Reason Type, tapi gak overwrite yang lama
 function populateReasonType(selectElement, accountType) {
-    let previousValue = selectElement.dataset.lockedValue || selectElement.value;
+    if (selectElement.dataset.locked === "true") return; // Jika sudah pernah diisi, skip
+
     selectElement.innerHTML = '<option value="">Pilih Reason Type</option>';
-    
+
     let filteredReasons = referenceData
         .filter(item => item["Account Type"] === accountType)
         .map(item => item["Reason Type"]);
-    
+
     [...new Set(filteredReasons)].forEach(reason => {
         let opt = document.createElement("option");
         opt.value = reason;
@@ -296,13 +301,20 @@ function populateReasonType(selectElement, accountType) {
         selectElement.appendChild(opt);
     });
 
-    if ([...selectElement.options].some(opt => opt.value === previousValue)) {
-        selectElement.value = previousValue;
-    }
-
-    selectElement.dataset.lockedValue = selectElement.value;
+    selectElement.dataset.locked = "true"; // Tandai agar tidak berubah lagi
 }
 
+// Update Reason Type di baris yang sudah ada setelah filter diubah
+function updateExistingRows() {
+    let allSelects = document.querySelectorAll(".reasonTypeSelect");
+    allSelects.forEach(select => {
+        if (!select.dataset.locked) {
+            populateReasonType(select, selectedAccountType);
+        }
+    });
+}
+
+// Tambah baris baru dengan dropdown Reason Type yang sesuai filter
 function addRow() {
     let tableBody = document.getElementById("inputTableBody");
     let newRow = document.createElement("tr");
@@ -325,10 +337,12 @@ function addRow() {
     tableBody.appendChild(newRow);
 }
 
+// Hapus baris
 function removeRow(button) {
     let row = button.parentNode.parentNode;
     row.remove();
 }
+
 
 
 function lockAccountType() {
