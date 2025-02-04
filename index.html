@@ -344,34 +344,35 @@ function removeRow(button) {
     row.remove();
 }
         
-            // Fungsi untuk mengupdate dropdown Reason Type berdasarkan Account Type
-           // Fungsi untuk mengupdate dropdown Reason Type berdasarkan Account Type
 function updateReasonTypeFilter() {
     let selectedAccountType = document.getElementById("accountTypeFilter").value;
     let rows = document.querySelectorAll("#inputTableBody tr");
 
     rows.forEach(row => {
         let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
+        let currentSelectedValue = reasonTypeSelect.value; // Simpan pilihan yang sudah ada
+
         reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
 
-        // Filter dan ambil nilai unik untuk Reason Type berdasarkan Account Type
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
-        // Hanya mengambil nilai yang unik
         let uniqueReasons = [...new Set(filteredReasons)];
 
-        // Menambahkan opsi ke dropdown
         uniqueReasons.forEach(reason => {
             let opt = document.createElement("option");
             opt.value = reason;
             opt.textContent = reason;
             reasonTypeSelect.appendChild(opt);
         });
+
+        // Kembalikan pilihan sebelumnya jika masih ada di opsi baru
+        if (uniqueReasons.includes(currentSelectedValue)) {
+            reasonTypeSelect.value = currentSelectedValue;
+        }
     });
 }
-
         
             // Function to process the data and populate the output table
             function processData() {
