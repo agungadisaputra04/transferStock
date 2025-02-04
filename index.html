@@ -261,7 +261,6 @@ label {
         <script>
 let referenceData = []; // Store reference JSON data
 
-// Fetch data from refrensi.json dan isi dropdown Account Type
 fetch('refrensi.json')
     .then(response => response.json())
     .then(data => {
@@ -278,7 +277,6 @@ fetch('refrensi.json')
     })
     .catch(error => console.error('Error loading preferences:', error));
 
-// Function untuk update Reason Type tanpa mereset pilihan sebelumnya
 function updateReasonTypeFilter() {
     let selectedAccountType = document.getElementById("accountTypeFilter").value;
     let rows = document.querySelectorAll("#inputTableBody tr");
@@ -306,9 +304,7 @@ function updateReasonTypeFilter() {
         });
 
         // Kembalikan pilihan sebelumnya jika masih valid
-        if (uniqueReasons.includes(selectedValue)) {
-            reasonTypeSelect.value = selectedValue;
-        }
+      
     });
 }
 
