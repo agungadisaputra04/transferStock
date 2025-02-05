@@ -1,3 +1,6 @@
+
+<!-- AGUNGADISAPUTRA -->
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -47,8 +50,7 @@
             color: white;
         }
     
-    
-        /* Styling buttons */
+
         button {
             padding: 10px 20px;
             margin: 10px 0;
@@ -102,7 +104,6 @@
             background-color:  #ff0000;
         }
         
-        /* Input and Select styling */
         input[type="text"], select {
             color: #333 !important;
         background-color: #ffffff !important;
@@ -129,32 +130,32 @@
     color: #ffffff;
 }
 
-/* Warna Teks */
+
 .dark-mode h1, 
 .dark-mode h2, 
 .dark-mode label {
     color: #ffffff !important;
 }
 
-/* Tabel */
+
 .dark-mode table {
-    background: linear-gradient(135deg, #2c3e50, #34495e); /* Gradient abu gelap */
+    background: linear-gradient(135deg, #2c3e50, #34495e); 
     border-radius: 8px;
 }
 
 .dark-mode th {
-    background-color: #4b225c; /* Ungu kalem */
+    background-color: #4b225c; 
     color: #ffffff;
     padding: 10px;
 }
 
 .dark-mode td {
-    background-color: #140c18; /* Ungu lebih gelap */
+    background-color: #140c18; 
     color: #ffffff;
     padding: 8px;
 }
 
-/* Input & Select */
+
 .dark-mode input[type="text"], 
 .dark-mode select {
     background-color: #5e3370 !important;
@@ -170,7 +171,7 @@
     box-shadow: 0 0 8px rgba(162, 155, 254, 0.8) !important;
 }
 .remove-btn {
-    background-color: #e74c3c !important; /* Warna merah asli */
+    background-color: #e74c3c !important; 
     color: white !important;
 }
 
@@ -187,7 +188,7 @@
     background-color: #c0392b !important;
 }
 
-/* Tombol */
+
 .dark-mode button {
   
     border: 2px solid #a29bfe !important;
@@ -204,12 +205,17 @@
     border: 2px solid #ffffff !important;
 }
 
-/* Spasi antar tombol */
+.dark-mode #csvPreview {
+        background-color: #2b2b2b;
+        border: 2px solid #00bfff; 
+        color: #ffffff; 
+    }
+
+
 .action-buttons button {
     margin-right: 10px; 
 }
 
-    /* Style untuk label */
 label {
     display: block;
     font-size: 16px;
@@ -218,11 +224,11 @@ label {
     margin-right: 10px;
 }
 
-/* Style untuk dropdown */
+
 #accountTypeFilter {
     width: 250px;
     padding: 10px;
-    border: 2px solid #6a0dad; /* Warna ungu kalem */
+    border: 2px solid #6a0dad;
     border-radius: 5px;
     font-size: 16px;
     background-color: rgba(255, 255, 255, 0.9);
@@ -232,29 +238,31 @@ label {
     transition: all 0.3s ease;
 }
 
-/* Hover efek */
+
 #accountTypeFilter:hover {
     background-color: rgba(255, 255, 255, 1);
 }
 
-/* Fokus efek */
+
 #accountTypeFilter:focus {
-    border-color: #9b30ff; /* Warna ungu lebih terang */
+    border-color: #9b30ff;
     box-shadow: 0px 0px 8px rgba(155, 48, 255, 0.6);
 }
 
 #csvPreview {
-    background-color: #f8f9fa; /* Warna latar belakang */
-    border: 2px solid #007bff; /* Border biru */
-    padding: 15px; /* Padding agar lebih luas */
-    border-radius: 8px; /* Membuat sudut lebih membulat */
-    font-family: monospace; /* Agar mirip tampilan kode */
-    white-space: pre-wrap; /* Supaya teks tidak keluar layar */
-    overflow-x: auto; /* Jika panjang, bisa digeser */
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); /* Efek bayangan */
-    max-height: 300px; /* Batas tinggi agar tidak terlalu panjang */
+    background-color: #f8f9fa; 
+    border: 2px solid #7a94af; 
+    padding: 15px; 
+    border-radius: 8px; 
+    font-family: monospace; 
+    white-space: pre-wrap; 
+    overflow-x: auto; 
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); 
+    max-height: 300px; 
+    display: inline-block; 
+    min-width: 50%; 
+    max-width: 90%; 
 }
-
 
     </style>
     
@@ -327,6 +335,7 @@ let selectedAccountType = "";
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("inputTableBody").innerHTML = "";
     document.getElementById("action-buttons").style.display = "none";
+    document.getElementById("csvPreview").style.display = "none";
     
     fetch('refrensi.json')
         .then(response => response.json())
@@ -342,7 +351,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 accountTypeFilter.appendChild(opt);
             });
 
-            // Update selectedAccountType when a selection is made
             accountTypeFilter.addEventListener("change", function () {
                 selectedAccountType = this.value;
                 updateReasonTypeFilter();
@@ -367,7 +375,7 @@ function populateReasonType(selectElement, accountType) {
         selectElement.appendChild(opt);
     });
 
-    // Prevent multiple event listeners
+
     if (!selectElement.dataset.listenerAdded) {
         selectElement.addEventListener("change", function () {
             if (this.value !== "") {
@@ -412,7 +420,7 @@ function removeRow(button) {
 
 document.addEventListener("input", function (event) {
     if (event.target.matches('input[type="text"]') && event.target.placeholder === "Jumlah") {
-        event.target.value = event.target.value.replace(/[^0-9]/g, ""); // Hanya angka
+        event.target.value = event.target.value.replace(/[^0-9]/g, ""); 
     }
 });
 
@@ -456,37 +464,35 @@ document.addEventListener("DOMContentLoaded", function () {
 function processData() {
     let inputTable = document.getElementById("inputTableBody");
     let outputTable = document.getElementById("outputTable").getElementsByTagName("tbody")[0];
-    outputTable.innerHTML = ""; // Bersihkan output sebelum memproses
+    outputTable.innerHTML = ""; 
 
     let rows = inputTable.getElementsByTagName("tr");
-    let dataValid = true; // Flag untuk validasi
+    let dataValid = true; 
 
     Array.from(rows).forEach(row => {
         let inputs = row.querySelectorAll("input, select");
-        let rowValid = true; // Flag untuk setiap baris
+        let rowValid = true; 
 
         inputs.forEach(input => {
             if (input.value.trim() === "") {
-                input.style.border = "2px solid red"; // Tambahkan border merah jika kosong
+                input.style.border = "2px solid red"; 
                 rowValid = false;
             } else {
-                input.style.border = ""; // Reset border jika sudah diisi
+                input.style.border = ""; 
             }
         });
 
-        if (!rowValid) dataValid = false; // Jika ada input kosong, tandai data tidak valid
+        if (!rowValid) dataValid = false; 
     });
 
-    // Jika ada input kosong, tampilkan alert dan hentikan eksekusi
     if (!dataValid) {
         alert("Harap isi semua data sebelum memproses!");
         return;
     }
 
-    // Jika semua data terisi, tampilkan tombol aksi
     document.getElementById("action-buttons").style.display = "block";
+    document.getElementById("csvPreview").style.display = "block";
 
-    // Proses data dan masukkan ke outputTable
     Array.from(rows).forEach(row => {
         let reasonTypeAlias = row.cells[0].querySelector("select").value;
         let debitIdentifierType = "ShortCode";
@@ -517,19 +523,14 @@ function generateCSVPreview() {
     let rows = outputTable.getElementsByTagName("tr");
     let csvContent = "ReasonType Alias,Debit IdentifierType,Debit IdentifierValue,Credit IdentifierType,Credit IdentifierValue,Amount,Currency,Comment\n";
 
-    let formattedContent = "<code>"; // Tambahkan tampilan dengan tag <code>
     Array.from(rows).forEach(row => {
         let rowData = Array.from(row.getElementsByTagName("td")).map(cell => cell.textContent);
-        let csvRow = rowData.join(",");
-        csvContent += csvRow + "\n";
-        formattedContent += csvRow.replace(/,/g, " | ") + "<br>"; // Ganti koma dengan " | " agar lebih rapi
+        csvContent += rowData.join(",") + "\n";
     });
 
-    formattedContent += "</code>";
-
-    document.getElementById("csvPreview").innerHTML = formattedContent; // Gunakan innerHTML agar format terjaga
-    document.getElementById("csvHidden").textContent = csvContent; // Simpan CSV asli untuk download
+    document.getElementById("csvPreview").textContent = csvContent;
 }
+
 
 
 function downloadCSV() {
