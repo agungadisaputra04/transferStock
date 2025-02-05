@@ -284,9 +284,9 @@ function updateReasonTypeFilter() {
     updateExistingRows(); // Update baris yang sudah ada
 }
 
-// Populate Reason Type, tapi gak overwrite yang lama
+// Populate Reason Type dan kunci setelah dipilih
 function populateReasonType(selectElement, accountType) {
-    if (selectElement.dataset.locked === "true") return; // Jika sudah pernah diisi, skip
+    if (selectElement.dataset.locked === "true") return; // Jika sudah dikunci, tidak perlu diupdate
 
     selectElement.innerHTML = '<option value="">Pilih Reason Type</option>';
 
@@ -301,26 +301,34 @@ function populateReasonType(selectElement, accountType) {
         selectElement.appendChild(opt);
     });
 
-    selectElement.dataset.locked = "true"; // Tandai agar tidak berubah lagi
-}
-
-// Update Reason Type di baris yang sudah ada setelah filter diubah
-function updateExistingRows() {
-    let allSelects = document.querySelectorAll(".reasonTypeSelect");
-    allSelects.forEach(select => {
-        if (!select.dataset.locked) {
-            populateReasonType(select, selectedAccountType);
+    // Tambahkan event listener agar setelah dipilih tidak bisa diubah
+    selectElement.addEventListener("change", function () {
+        if (this.value !== "") {
+            this.disabled = true; // Kunci dropdown setelah user memilih
+            this.dataset.locked = "true"; 
         }
     });
 }
 
-// Tambah baris baru dengan dropdown Reason Type yang sesuai filter
+// Update Reason Type di baris yang sudah ada setelah Account Type difilter
+function updateExistingRows() {
+    let allSelects = document.querySelectorAll(".reasonTypeSelect");
+    allSelects.forEach(select => {
+        populateReasonType(select, selectedAccountType);
+    });
+}
+
+// Tambah baris baru dan set event listener
 function addRow() {
     let tableBody = document.getElementById("inputTableBody");
     let newRow = document.createElement("tr");
-
+    
     newRow.innerHTML = `
-        <td><select class="reasonTypeSelect"></select></td>
+        <td>
+            <select class="reasonTypeSelect">
+                <option value="">Pilih Reason Type</option>
+            </select>
+        </td>
         <td><input type="text" value="ShortCode" readonly></td>
         <td><input type="text" value="00301"></td>
         <td><input type="text" value="ShortCode" readonly></td>
@@ -331,10 +339,10 @@ function addRow() {
         <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
     `;
 
-    let reasonTypeSelect = newRow.querySelector(".reasonTypeSelect");
-    populateReasonType(reasonTypeSelect, selectedAccountType);
-    
     tableBody.appendChild(newRow);
+    
+    let reasonSelect = newRow.querySelector(".reasonTypeSelect");
+    populateReasonType(reasonSelect, selectedAccountType);
 }
 
 // Hapus baris
