@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TF STOCK CUY</title>
+    <title>TF STOCK w CUY</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -277,13 +277,8 @@ fetch('refrensi.json')
     })
     .catch(error => console.error('Error loading preferences:', error));
 
-function updateReasonTypeFilter() {
-    selectedAccountType = document.getElementById("accountTypeFilter").value;
-    updateExistingRows(); 
-}
-
 function populateReasonType(selectElement, accountType) {
-    // If the dropdown is locked, do not modify it
+    // If the dropdown is locked, don't modify it
     if (selectElement.dataset.locked === "true") return;
 
     // Clear current options and add the default "Pilih Reason Type"
@@ -311,37 +306,89 @@ function populateReasonType(selectElement, accountType) {
     });
 }
 
-function updateReasonTypeFilter() {
-    // Get selected Account Type from the filter
-    selectedAccountType = document.getElementById("accountTypeFilter").value;
-
-    // Get all Reason Type select elements
+function updateExistingRows() {
     let allSelects = document.querySelectorAll(".reasonTypeSelect");
-
-    // Loop through all selects and update only the unlocked ones
     allSelects.forEach(select => {
-        // Skip locked reason type dropdowns
-        if (select.dataset.locked === "true") return;
+        populateReasonType(select, selectedAccountType);
+    });
+}
 
-        // Filter reasons based on the selected Account Type
+function addRow() {
+    let tableBody = document.getElementById("inputTableBody");
+    let newRow = document.createElement("tr");
+
+    newRow.innerHTML = `
+        <td>
+            <select class="reasonTypeSelect">
+                <option value="">Pilih Reason Type</option>
+            </select>
+        </td>
+        <td><input type="text" value="ShortCode" readonly></td>
+        <td><input type="text" value="00301"></td>
+        <td><input type="text" value="ShortCode" readonly></td>
+        <td><input type="text" value="TELKOMSEL"></td>
+        <td><input type="text" value="18252000000"></td>
+        <td><input type="text" value="IDR"></td>
+        <td><input type="text" value="0141/MK.03/PC-44/IX/2024"></td>
+        <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
+    `;
+
+    tableBody.appendChild(newRow);
+
+    let reasonSelect = newRow.querySelector(".reasonTypeSelect");
+    populateReasonType(reasonSelect, selectedAccountType);
+}
+
+function removeRow(button) {
+    let row = button.parentNode.parentNode;
+    row.remove();
+}
+
+function lockAccountType() {
+    let allSelectedReasons = document.querySelectorAll(".reasonTypeSelect");
+    let hasSelectedReason = Array.from(allSelectedReasons).some(select => select.value);
+
+    document.getElementById("accountTypeFilter").disabled = hasSelectedReason;
+}
+
+function saveTempData(index, value) {
+    tempData[index] = value;
+}
+
+function updateReasonTypeFilter() {
+    let selectedAccountType = document.getElementById("accountTypeFilter").value;
+    let rows = document.querySelectorAll("#inputTableBody tr");
+
+    rows.forEach(row => {
+        let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
+        let previousSelectedValue = reasonTypeSelect.value;
+
+        // Skip locked reason type dropdowns
+        if (reasonTypeSelect.dataset.locked === "true") return;
+
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
         let uniqueReasons = [...new Set(filteredReasons)];
 
-        // If options need to be updated, do it
-        let currentOptions = Array.from(select.options).map(opt => opt.value);
+        // Check if the options need to be updated
+        let currentOptions = Array.from(reasonTypeSelect.options).map(opt => opt.value);
         if (JSON.stringify(currentOptions) !== JSON.stringify(["", ...uniqueReasons])) {
-            select.innerHTML = '<option value="">Pilih Reason Type</option>'; // Clear existing options
+            reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>'; // Clear existing options
 
             // Add new unique options for the filtered reasons
             uniqueReasons.forEach(reason => {
                 let opt = document.createElement("option");
                 opt.value = reason;
                 opt.textContent = reason;
-                select.appendChild(opt);
+                reasonTypeSelect.appendChild(opt);
             });
+
+            // Restore the previous selected value if it exists in the new options
+            if (uniqueReasons.includes(previousSelectedValue)) {
+                reasonTypeSelect.value = previousSelectedValue;
+            }
         }
     });
 }
