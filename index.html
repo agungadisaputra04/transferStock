@@ -262,7 +262,6 @@ label {
 let referenceData = [];
 let selectedAccountType = "";
 
-// Fetch data untuk dropdown
 fetch('refrensi.json')
     .then(response => response.json())
     .then(data => {
@@ -278,22 +277,24 @@ fetch('refrensi.json')
     })
     .catch(error => console.error('Error loading preferences:', error));
 
-// Simpan filter yang dipilih
 function updateReasonTypeFilter() {
     selectedAccountType = document.getElementById("accountTypeFilter").value;
-    updateExistingRows(); // Update baris yang sudah ada
+    updateExistingRows(); 
 }
 
-// Populate Reason Type dan kunci setelah dipilih
 function populateReasonType(selectElement, accountType) {
-    if (selectElement.dataset.locked === "true") return; // Jika sudah dikunci, tidak perlu diupdate
+    // If the dropdown is locked, do not modify it
+    if (selectElement.dataset.locked === "true") return;
 
+    // Clear current options and add the default "Pilih Reason Type"
     selectElement.innerHTML = '<option value="">Pilih Reason Type</option>';
 
+    // Filter the reference data to get the available Reason Types for the selected Account Type
     let filteredReasons = referenceData
         .filter(item => item["Account Type"] === accountType)
         .map(item => item["Reason Type"]);
 
+    // Add unique reasons as options
     [...new Set(filteredReasons)].forEach(reason => {
         let opt = document.createElement("option");
         opt.value = reason;
@@ -301,101 +302,50 @@ function populateReasonType(selectElement, accountType) {
         selectElement.appendChild(opt);
     });
 
-    // Tambahkan event listener agar setelah dipilih tidak bisa diubah
+    // Add event listener to lock the dropdown once a value is selected
     selectElement.addEventListener("change", function () {
         if (this.value !== "") {
-            this.disabled = true; // Kunci dropdown setelah user memilih
-            this.dataset.locked = "true"; 
+            this.disabled = true;
+            this.dataset.locked = "true"; // Lock the dropdown
         }
     });
 }
 
-// Update Reason Type di baris yang sudah ada setelah Account Type difilter
-function updateExistingRows() {
-    let allSelects = document.querySelectorAll(".reasonTypeSelect");
-    allSelects.forEach(select => {
-        populateReasonType(select, selectedAccountType);
-    });
-}
-
-// Tambah baris baru dan set event listener
-function addRow() {
-    let tableBody = document.getElementById("inputTableBody");
-    let newRow = document.createElement("tr");
-    
-    newRow.innerHTML = `
-        <td>
-            <select class="reasonTypeSelect">
-                <option value="">Pilih Reason Type</option>
-            </select>
-        </td>
-        <td><input type="text" value="ShortCode" readonly></td>
-        <td><input type="text" value="00301"></td>
-        <td><input type="text" value="ShortCode" readonly></td>
-        <td><input type="text" value="TELKOMSEL"></td>
-        <td><input type="text" value="18252000000"></td>
-        <td><input type="text" value="IDR"></td>
-        <td><input type="text" value="0141/MK.03/PC-44/IX/2024"></td>
-        <td><button class="remove-btn" onclick="removeRow(this)">Hapus</button></td>
-    `;
-
-    tableBody.appendChild(newRow);
-    
-    let reasonSelect = newRow.querySelector(".reasonTypeSelect");
-    populateReasonType(reasonSelect, selectedAccountType);
-}
-
-// Hapus baris
-function removeRow(button) {
-    let row = button.parentNode.parentNode;
-    row.remove();
-}
-
-
-
-function lockAccountType() {
-    let allSelectedReasons = document.querySelectorAll(".reasonTypeSelect");
-    let hasSelectedReason = Array.from(allSelectedReasons).some(select => select.value);
-
-    document.getElementById("accountTypeFilter").disabled = hasSelectedReason;
-}
-
-function saveTempData(index, value) {
-    tempData[index] = value;
-}
-        
 function updateReasonTypeFilter() {
-    let selectedAccountType = document.getElementById("accountTypeFilter").value;
-    let rows = document.querySelectorAll("#inputTableBody tr");
+    // Get selected Account Type from the filter
+    selectedAccountType = document.getElementById("accountTypeFilter").value;
 
-    rows.forEach(row => {
-        let reasonTypeSelect = row.querySelector(".reasonTypeSelect");
-        let previousSelectedValue = reasonTypeSelect.value; 
+    // Get all Reason Type select elements
+    let allSelects = document.querySelectorAll(".reasonTypeSelect");
 
+    // Loop through all selects and update only the unlocked ones
+    allSelects.forEach(select => {
+        // Skip locked reason type dropdowns
+        if (select.dataset.locked === "true") return;
 
+        // Filter reasons based on the selected Account Type
         let filteredReasons = referenceData
             .filter(item => item["Account Type"] === selectedAccountType)
             .map(item => item["Reason Type"]);
 
         let uniqueReasons = [...new Set(filteredReasons)];
 
-        let currentOptions = Array.from(reasonTypeSelect.options).map(opt => opt.value);
+        // If options need to be updated, do it
+        let currentOptions = Array.from(select.options).map(opt => opt.value);
         if (JSON.stringify(currentOptions) !== JSON.stringify(["", ...uniqueReasons])) {
-            reasonTypeSelect.innerHTML = '<option value="">Pilih Reason Type</option>';
+            select.innerHTML = '<option value="">Pilih Reason Type</option>'; // Clear existing options
 
+            // Add new unique options for the filtered reasons
             uniqueReasons.forEach(reason => {
                 let opt = document.createElement("option");
                 opt.value = reason;
                 opt.textContent = reason;
-                reasonTypeSelect.appendChild(opt);
+                select.appendChild(opt);
             });
-
-            if (uniqueReasons.includes(previousSelectedValue)) {
-                reasonTypeSelect.value = previousSelectedValue;
-            }
         }
     });
 }
+
 
 
         
