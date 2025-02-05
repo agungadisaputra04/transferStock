@@ -326,7 +326,7 @@ label {
     
             <h3>Review CSV Format</h3>
             <pre id="csvPreview"></pre> 
-            
+            <textarea id="csvHidden" style="display: none;"></textarea>
         </div>
         <script>
 let referenceData = [];
@@ -524,17 +524,23 @@ function generateCSVPreview() {
     let csvContent = "ReasonType Alias,Debit IdentifierType,Debit IdentifierValue,Credit IdentifierType,Credit IdentifierValue,Amount,Currency,Comment\n";
 
     Array.from(rows).forEach(row => {
-        let rowData = Array.from(row.getElementsByTagName("td")).map(cell => cell.textContent);
+        let rowData = Array.from(row.getElementsByTagName("td")).map(cell => {
+            let text = cell.textContent.trim();
+            return isNaN(text) ? text : `"${text}"`;
+        });
         csvContent += rowData.join(",") + "\n";
     });
 
     document.getElementById("csvPreview").textContent = csvContent;
+    document.getElementById("csvHidden").textContent = csvContent; 
 }
 
 
 
+
+
 function downloadCSV() {
-    let csvContent = document.getElementById("csvHidden").textContent; // Ambil CSV asli tanpa format
+    let csvContent = document.getElementById("csvHidden").value; 
     let blob = new Blob([csvContent], { type: 'text/csv' });
 
     let now = new Date();
@@ -548,7 +554,9 @@ function downloadCSV() {
     let link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = filename;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
 }
 
 
